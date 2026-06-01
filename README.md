@@ -1,6 +1,6 @@
 <div dir="rtl" align="justify">
 
-# پروژه کوتاه‌کننده لینک (Link Shortener)
+# کوتاه‌کننده لینک (Link Shortener)
 
 ## معرفی پروژه
 
@@ -64,7 +64,7 @@ npm run dev
 - **Context API** (مدیریت استیت ها و نگه‌داری لاجیک)
 - **React Portal** (اصلی DOM نمایش مدال خارج از )
 - **localStorage** (ذخیره لینک‌ها)
-- **react-hot-toast** (validation و copy ،share نمایش پیام‌های موفقیت/خطا برای )
+- **react-hot-toast** 
 - **qrcode.react** (QR Code ساخت)
 - **react-icons** (آیکون‌ها)
 - **Vite** 
