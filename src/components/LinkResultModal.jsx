@@ -1,68 +1,22 @@
 import { createPortal } from "react-dom";
 import { FiX, FiLink, FiShare2, FiCopy } from "react-icons/fi";
-import { toast } from "react-hot-toast";
+import useShareLink from "../hooks/useShareLink";
+import useCopyLink from "../hooks/useCopyLink";
 
 export default function LinkResultModal({ open, onClose, link }) {
     // Don't render anything when the modal is closed
     if (!open) return null;
 
-    // Normalize incoming link fields 
-    const originalUrl = link?.original ?? link?.url ?? "";
-    const shortRaw = link?.short ?? link?.shortUrl ?? "";
+    const { shareLink } = useShareLink();
+    const { copyLink } = useCopyLink();
 
-    // Ensure the short URL is a valid absolute URL (add protocol if missing)
-    function normalizeUrl(value) {
-        if (!value) return "";
+    const originalLink = link?.originalLink || "";
+    const shortLink = link?.shortLink || "";
 
-        const hasProtocol = /^https?:\/\//i.test(value);
-        if (hasProtocol) return value;
-
-        return `https://${value}`;
-    }
-    const shortUrl = normalizeUrl(shortRaw);
-
-    const handleCopy = async () => {
-        // Nothing to copy
-        if (!shortUrl) return;
-
-        // Close the modal first for a smoother UX
+    const handleCopy = () => copyLink(shortLink, onClose);
+    const handleShare = () => {
         onClose?.();
-
-        try {
-            // Copy using the modern Clipboard API
-            await navigator.clipboard.writeText(shortUrl);
-            toast.success("لینک کپی شد");
-        } catch {
-            // Clipboard API may fail on insecure contexts or restricted browsers
-            toast.error("Clipboard access is not available");
-        }
-    };
-
-    const handleShare = async () => {
-        // Nothing to share
-        if (!shortUrl) return;
-
-        // Close the modal first for a smoother UX
-        onClose?.();
-
-        try {
-            // Use the Web Share API when available (mostly mobile browsers)
-            if (navigator.share) {
-                await navigator.share({
-                    title: "Shortened link",
-                    text: "Here is the shortened link:",
-                    url: shortUrl,
-                });
-                return;
-            }
-
-            // Fallback: copy to clipboard when share is not supported
-            await navigator.clipboard.writeText(shortUrl);
-            toast.success("اشتراک گذاری پشتیبانی نشد(کپی شد)");
-        } catch {
-            // Covers share rejection, clipboard failures, etc.
-            toast.error("خطا در اشتراک گذاری");
-        }
+        shareLink(shortLink);
     };
 
     return createPortal(
@@ -101,7 +55,7 @@ export default function LinkResultModal({ open, onClose, link }) {
                             Original URL
                         </div>
                         <div dir="ltr" className="mt-1 break-all text-sm text-slate-900">
-                            {originalUrl || "-"}
+                            {originalLink || "-"}
                         </div>
                     </div>
 
@@ -115,7 +69,7 @@ export default function LinkResultModal({ open, onClose, link }) {
                             dir="ltr"
                             className="mt-1 break-all text-sm font-semibold text-slate-900"
                         >
-                            {shortUrl || "-"}
+                            {shortLink || "-"}
                         </div>
                     </div>
                 </div>
@@ -126,7 +80,7 @@ export default function LinkResultModal({ open, onClose, link }) {
                     <button
                         type="button"
                         onClick={handleCopy}
-                        disabled={!shortUrl}
+                        disabled={!shortLink}
                         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
                         aria-label="Copy short link"
                         title="Copy"
@@ -138,7 +92,7 @@ export default function LinkResultModal({ open, onClose, link }) {
                     <button
                         type="button"
                         onClick={handleShare}
-                        disabled={!shortUrl}
+                        disabled={!shortLink}
                         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
                         aria-label="Share short link"
                         title="Share"

@@ -1,4 +1,4 @@
-import { FiSearch, FiX } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 
 export default function HistorySearch({ value, onChange, onClear }) {
     return (
