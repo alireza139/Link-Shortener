@@ -2,13 +2,19 @@ import { useUrl } from "../context/UrlContext";
 import HistorySearch from "./HistorySearch";
 import ShortLinkCard from "./ShortLinkCard";
 import useFilterLinks from "../hooks/useFilterLinks";
+import useLock from "../hooks/useLock";
 
 export default function HistoryBox() {
     const { links, deleteLink } = useUrl();
     const { query, setQuery, filteredLinks } = useFilterLinks(links);
+    const { runWithLock } = useLock(500);
 
     const isEmpty = links.length === 0;
     const noResults = filteredLinks.length === 0;
+
+    const handleDelete = (id) => {
+        runWithLock(() => deleteLink(id));
+    };
 
     return (
         <div>
@@ -45,7 +51,7 @@ export default function HistoryBox() {
                         <ShortLinkCard
                             key={link.id}
                             link={link}
-                            onDelete={deleteLink}
+                            onDelete={() => handleDelete(link.id)}
                         />
                     ))}
                 </div>

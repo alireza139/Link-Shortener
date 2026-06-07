@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { FiLink2, FiArrowLeft, FiHash, FiLoader, FiClock } from "react-icons/fi";
+import {
+  FiLink2, FiArrowLeft, FiHash, FiLoader,
+  FiClock, FiChevronDown
+} from "react-icons/fi";
+
 import { useUrl } from "../context/UrlContext";
 import LinkResultModal from "./LinkResultModal";
-import useNormalizeUrl from "../hooks/useNormalizeUrl";
+import { normalizeUrl, normalizeAlias } from "../utils/normalizeInput";
 import useUrlValidation from "../hooks/useUrlValidation";
 import useAliasLimiter from "../hooks/useAliasLimiter";
 import useToggle from "../hooks/useToggle";
@@ -12,12 +16,9 @@ export default function UrlForm() {
   const [url, setUrl] = useState("");
   const [alias, setAlias] = useState("");
   const [expiry, setExpiry] = useState("never");
-
-  // Result modal state
   const [resultLink, setResultLink] = useState(null);
 
   // Custom hooks
-  const { normalizeUrl } = useNormalizeUrl();
   const { validateUrl, invalidFormat } = useUrlValidation();
   const { limitAlias } = useAliasLimiter(12);
   const resultModal = useToggle();
@@ -28,31 +29,30 @@ export default function UrlForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const trimmedUrl = url.trim();
-    if (!trimmedUrl) return;
-    
-    const trimmedAlias = alias.trim();
+    // 1)Normalize inputs 
+    const finalUrl = normalizeUrl(url);
+    const finalAlias = normalizeAlias(alias);
 
-    if (!validateUrl(trimmedUrl)) return;
-
-    const finalUrl = normalizeUrl(trimmedUrl);
-
-    if (!finalUrl) {
+    // 2)Validate using hook
+    if (!finalUrl || !validateUrl(finalUrl)) {
       invalidFormat();
       return;
     }
 
+    // 3)Submit 
     const newLink = await shortenUrl({
       url: finalUrl,
-      alias: trimmedAlias || undefined,
+      alias: finalAlias || undefined,
       expiry,
     });
 
     if (!newLink) return;
 
+    // 4) Show modal with result
     setResultLink(newLink);
     resultModal.open();
 
+    // 5) Reset form
     setUrl("");
     setAlias("");
     setExpiry("never");
@@ -66,7 +66,7 @@ export default function UrlForm() {
         </label>
 
         <div className="relative">
-          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-900">
+          <span className="pointer-events-none absolute inset-y-0 right-3 z-10 flex items-center text-slate-700">
             <FiLink2 />
           </span>
 
@@ -86,7 +86,7 @@ export default function UrlForm() {
         </label>
 
         <div className="relative">
-          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-900">
+          <span className="pointer-events-none absolute inset-y-0 right-3 z-10 flex items-center text-slate-700">
             <FiHash />
           </span>
 
@@ -101,7 +101,7 @@ export default function UrlForm() {
           />
         </div>
 
-        {/* Expiry + submit row */}
+        {/* Expiry + submit */}
         <div className="flex items-end justify-between gap-3">
           <div className="w-48">
             <label className="mb-2 block text-sm font-medium text-slate-800">
@@ -109,7 +109,7 @@ export default function UrlForm() {
             </label>
 
             <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-900">
+              <span className="pointer-events-none absolute inset-y-0 right-3 z-10 flex items-center text-slate-700">
                 <FiClock />
               </span>
 
@@ -125,6 +125,10 @@ export default function UrlForm() {
                 <option value="7d">7 روز</option>
                 <option value="30d">30 روز</option>
               </select>
+
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <FiChevronDown />
+              </span>
             </div>
           </div>
 
@@ -135,8 +139,8 @@ export default function UrlForm() {
           >
             {isShortening ? (
               <>
+                <span>کمی صبر کنید</span>
                 <FiLoader className="animate-spin" />
-                <span>کمی صبر کنید...</span>
               </>
             ) : (
               <>
@@ -152,12 +156,13 @@ export default function UrlForm() {
         </p>
       </form>
 
-      <LinkResultModal
-        open={resultModal.isOpen}
-        onClose={resultModal.close}
-        link={resultLink}
-      />
-
+      {resultModal.isOpen && (
+        <LinkResultModal
+          open={resultModal.isOpen}
+          onClose={resultModal.close}
+          link={resultLink}
+        />
+      )}
     </>
   );
 }

@@ -63,7 +63,7 @@ export default function ShortLinkCard({ link, onDelete }) {
           </button>
 
           <button
-            onClick={() => onDelete(link.id)}
+            onClick={onDelete}
             className="flex h-10 w-10 cursor-pointer shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition-all hover:bg-red-50 hover:text-red-600"
             title="حذف لینک"
           >

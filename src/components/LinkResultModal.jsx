@@ -10,14 +10,8 @@ export default function LinkResultModal({ open, onClose, link }) {
     const { shareLink } = useShareLink();
     const { copyLink } = useCopyLink();
 
-    const originalLink = link?.originalLink || "";
-    const shortLink = link?.shortLink || "";
-
-    const handleCopy = () => copyLink(shortLink, onClose);
-    const handleShare = () => {
-        onClose?.();
-        shareLink(shortLink);
-    };
+    const handleCopy = () => copyLink(link.shortLink, onClose);
+    const handleShare = () => shareLink(link.shortLink);
 
     return createPortal(
         <div className="fixed inset-0 z-[9999]">
@@ -55,7 +49,7 @@ export default function LinkResultModal({ open, onClose, link }) {
                             Original URL
                         </div>
                         <div dir="ltr" className="mt-1 break-all text-sm text-slate-900">
-                            {originalLink || "-"}
+                            {link.originalLink || "-"}
                         </div>
                     </div>
 
@@ -69,7 +63,7 @@ export default function LinkResultModal({ open, onClose, link }) {
                             dir="ltr"
                             className="mt-1 break-all text-sm font-semibold text-slate-900"
                         >
-                            {shortLink || "-"}
+                            {link.shortLink || "-"}
                         </div>
                     </div>
                 </div>
@@ -80,7 +74,7 @@ export default function LinkResultModal({ open, onClose, link }) {
                     <button
                         type="button"
                         onClick={handleCopy}
-                        disabled={!shortLink}
+                        disabled={!link.shortLink}
                         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
                         aria-label="Copy short link"
                         title="Copy"
@@ -92,7 +86,7 @@ export default function LinkResultModal({ open, onClose, link }) {
                     <button
                         type="button"
                         onClick={handleShare}
-                        disabled={!shortLink}
+                        disabled={!link.shortLink}
                         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
                         aria-label="Share short link"
                         title="Share"

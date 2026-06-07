@@ -1,18 +1,14 @@
-import { useRef } from "react";
 import toast from "react-hot-toast";
+import useLock from "./useLock";
 
 export default function useAliasLimiter(max = 12) {
-    const toastLock = useRef(false);
+    const { runWithLock } = useLock(1200);
 
     const limitAlias = (value) => {
-        if (value.length > max && !toastLock.current) {
-            toastLock.current = true;
-
-            toast.error(`حداکثر طول آدرس پیشنهادی ${max} کاراکتر است`);
-
-            setTimeout(() => {
-                toastLock.current = false;
-            }, 1200);
+        if (value.length > max) {
+            runWithLock(() => {
+                toast.error(`حداکثر طول آدرس پیشنهادی ${max} کاراکتر است`);
+            });
         }
 
         return value.slice(0, max);

@@ -1,17 +1,22 @@
 import { toast } from "react-hot-toast";
+import useLock from "./useLock";
 
 export default function useCopyLink() {
-    const copyLink = async (url, onClose) => {
-        if (!url) return;
+    const { runWithLock } = useLock(1200);
 
-        onClose?.();
+    const copyLink = (url, onClose) => {
+        runWithLock(async () => {
+            if (!url) return;
 
-        try {
-            await navigator.clipboard.writeText(url);
-            toast.success("لینک کپی شد");
-        } catch {
-            toast.error("Clipboard access is not available");
-        }
+            onClose?.();
+
+            try {
+                await navigator.clipboard.writeText(url);
+                toast.success("لینک کپی شد");
+            } catch {
+                toast.error("Clipboard access is not available");
+            }
+        });
     };
 
     return { copyLink };
